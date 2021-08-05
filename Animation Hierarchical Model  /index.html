@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+
+<html>
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="model_geometry.js"></script>
+<script type="text/javascript" src="main.js"></script> 
+<head>
+<link rel="stylesheet" href="./tailwind.min.css"/>
+<script id="fragment-basic" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec4 fColor;
+
+void main()
+{
+
+    gl_FragColor = fColor;
+}
+</script>
+
+<script id="fragment-phong-textured" type="x-shader/x-vertex">
+precision highp float;
+//HW470: Vertex attributes varied
+varying vec4 v_vertexPosition;
+varying vec4 v_vertexNormal;
+varying vec2 v_texCoord;
+
+uniform vec4 lightPosition; 
+uniform vec3 lightColor;
+uniform float lightStrength;
+uniform float numLights;
+
+uniform vec3 matAmb;
+uniform vec3 matDif;
+uniform vec3 matSpec;
+uniform vec4 constants;
+
+uniform mat4 u_projMatrix; 
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
+
+uniform sampler2D u_texture;
+
+void main()
+{   
+    mat4 mvMatrix = u_viewMatrix * u_modelMatrix;
+    vec3 eye = vec3(0.0, 0.0, 0.0);
+    vec3 position = (mvMatrix * v_vertexPosition).xyz;
+    vec3 light = (u_viewMatrix * lightPosition).xyz;
+    vec3 lVec = light - position;
+    float lMagSqr = dot(lVec, lVec);
+    vec3 L = lVec / sqrt(lMagSqr);
+    vec3 E = normalize(eye - position);
+    vec3 R = normalize(L + E);
+    vec3 N = normalize((mvMatrix * v_vertexNormal).xyz);
+
+    float Ka = constants.x;
+    float Kd = constants.y;
+    float Ks = constants.z;
+    float shininess = constants.w;
+
+    vec3 ambient = Ka * matAmb / numLights;
+	
+    float d = max(dot(L, N), 0.0);
+    vec3 samp = texture2D(u_texture, v_texCoord).xyz;
+    vec3 diffuse = Kd * d * (samp * lightColor);
+
+
+    float s = pow(max(dot(N, R), 0.0), shininess);
+    vec3 specular = Ks * s * (matSpec * lightColor);
+
+    gl_FragColor = vec4(((diffuse + specular) / (lMagSqr + 0.5) * lightStrength) + ambient, 1.0);
+}
+</script>
+
+
+<script id="fragment-phong" type="x-shader/x-vertex">
+precision highp float;
+varying vec4 v_vertexPosition;
+varying vec4 v_vertexNormal;
+varying vec2 v_texCoord;
+            
+uniform vec4 lightPosition; 
+uniform vec3 lightColor;
+uniform float lightStrength;
+uniform float numLights;
+
+uniform vec3 matAmb;
+uniform vec3 matDif;
+uniform vec3 matSpec;
+uniform vec4 constants;
+
+uniform mat4 u_projMatrix; 
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
+
+void main()
+{   
+    mat4 mvMatrix = u_viewMatrix * u_modelMatrix;
+    vec3 eye = vec3(0.0, 0.0, 0.0);
+    vec3 position = (mvMatrix * v_vertexPosition).xyz;
+    vec3 light = (u_viewMatrix * lightPosition).xyz;
+    vec3 lVec = light - position;
+    float lMagSqr = dot(lVec, lVec);
+    vec3 L = lVec / sqrt(lMagSqr);
+    vec3 E = normalize(eye - position);
+    vec3 R = normalize(L + E);
+    vec3 N = normalize((mvMatrix * v_vertexNormal).xyz);
+
+    float Ka = constants.x;
+    float Kd = constants.y;
+    float Ks = constants.z;
+    float shininess = constants.w;
+	
+    vec3 ambient = Ka * matAmb / numLights;
+
+    float d = max(dot(L, N), 0.0);
+    vec3 diffuse = Kd * d * (matDif * lightColor);
+
+    float s = pow(max(dot(N, R), 0.0), shininess);
+    vec3 specular = Ks * s * (matSpec * lightColor);
+    gl_FragColor = vec4(((diffuse + specular) / (lMagSqr + 0.5) * lightStrength) + ambient, 1.0);
+}
+</script>
+
+
+<script id="vertex-phong" type="x-shader/x-vertex">
+//HW470: Vertex shader for phong shading
+attribute vec4 a_vertexPosition;
+attribute vec4 a_vertexNormal;
+attribute vec2 a_texCoord;
+
+//HW470: Vertex attributes varied
+varying vec4 v_vertexPosition;
+varying vec4 v_vertexNormal;
+varying vec2 v_texCoord;
+
+uniform mat4 u_projMatrix; 
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
+
+void main()
+{
+
+    v_vertexPosition = a_vertexPosition;
+    v_vertexNormal = a_vertexNormal;
+    v_texCoord = a_texCoord;
+
+    gl_Position = u_projMatrix * u_viewMatrix * u_modelMatrix * a_vertexPosition;
+}
+</script>
+
+
+<script id="vertex-light" type="x-shader/x-vertex">
+//HW470: Simple vertex shader for light render
+attribute vec4 a_vertexPosition;
+attribute vec4 a_vertexColor;
+attribute float a_lightStrength;
+
+varying vec4 fColor;
+
+uniform mat4 u_projMatrix; 
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
+void main()
+{
+    fColor = a_vertexColor;
+    gl_Position = u_projMatrix * u_viewMatrix * u_modelMatrix * a_vertexPosition;
+    gl_PointSize = 20.0 * a_lightStrength/gl_Position.w;
+}
+</script>	
+
+<script id="vertex-basic" type="x-shader/x-vertex">
+attribute vec4 a_vertexPosition;
+attribute vec4 a_vertexColor;
+attribute vec2 a_texCoord;
+
+varying vec4 fColor;
+
+uniform mat4 u_projMatrix;
+uniform mat4 u_viewMatrix;
+uniform mat4 u_modelMatrix;
+
+void main()
+{
+    fColor = a_vertexColor;
+    gl_Position = u_projMatrix * (u_viewMatrix * (u_modelMatrix * a_vertexPosition));
+}
+</script>
+
+<body>
+    <div class="text-sans container mx-auto flex flex-col justify-content items-center">
+        <h1 class="my-8 py-4">
+            WebGL Walking Cat Animation
+        </h1>
+        <div class="py-4 flex justify-center items-center">
+            <button id="anim-toggle" class="bg-transparent hover:bg-blue-light text-blue-light font-semibold hover:text-white py-4 px-6 border border-blue-light hover:border-transparent rounded-full mx-4">
+                Pause / Resume Animation
+            </button>
+        </div>
+        <canvas class="my-8" id="gl-canvas" width="1024" height="1024">
+        Oops ... your browser doesn't support the HTML5 canvas element
+        </canvas>
+    </div>
+</body>
+</html>
