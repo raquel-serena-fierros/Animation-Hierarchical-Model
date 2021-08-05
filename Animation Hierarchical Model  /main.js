@@ -1,11 +1,7 @@
 var canvas;
-
 var animation = true;
-
 var gl;
-
 var scene;
-
 var fps = 0;
 
 function init() {
