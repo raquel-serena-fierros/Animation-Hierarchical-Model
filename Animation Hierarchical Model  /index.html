@@ -23,7 +23,6 @@ void main()
 
 <script id="fragment-phong-textured" type="x-shader/x-vertex">
 precision highp float;
-//HW470: Vertex attributes varied
 varying vec4 v_vertexPosition;
 varying vec4 v_vertexNormal;
 varying vec2 v_texCoord;
@@ -128,12 +127,10 @@ void main()
 
 
 <script id="vertex-phong" type="x-shader/x-vertex">
-//HW470: Vertex shader for phong shading
 attribute vec4 a_vertexPosition;
 attribute vec4 a_vertexNormal;
 attribute vec2 a_texCoord;
 
-//HW470: Vertex attributes varied
 varying vec4 v_vertexPosition;
 varying vec4 v_vertexNormal;
 varying vec2 v_texCoord;
@@ -155,7 +152,6 @@ void main()
 
 
 <script id="vertex-light" type="x-shader/x-vertex">
-//HW470: Simple vertex shader for light render
 attribute vec4 a_vertexPosition;
 attribute vec4 a_vertexColor;
 attribute float a_lightStrength;
