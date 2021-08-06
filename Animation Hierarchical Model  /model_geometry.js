@@ -108,7 +108,6 @@ function multMatVec(u, v) {
     }
     res.push( sum );
   }
-
   return res;
 }
 function planeY(w,l,texRepeat) {
