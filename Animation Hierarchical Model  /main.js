@@ -7,7 +7,6 @@ var fps = 0;
 function init() {
   canvas = document.getElementById("gl-canvas");
 
-
   gl = WebGLUtils.setupWebGL(canvas);
   if (!gl) { alert("WebGL isn't available"); }
 
@@ -17,10 +16,9 @@ function init() {
   scene.camera = new Camera(new Transform(0,0,3), 100, canvas.width/canvas.height, 0.1, 100);
   
   var myimage = new Image();
-myimage.crossOrigin = "anonymous";
-//myimage.src = "SA2011_black.gif"
- 
-myimage.src = "https://webglfundamentals.org/webgl/resources/mip-low-res-example.png"
+	
+  myimage.crossOrigin = "anonymous";
+  myimage.src = "https://webglfundamentals.org/webgl/resources/mip-low-res-example.png"
 
   myimage.onload = function() { 
       configureTexture( myimage );
@@ -37,12 +35,13 @@ myimage.src = "https://webglfundamentals.org/webgl/resources/mip-low-res-example
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, 
                         gl.NEAREST_MIPMAP_LINEAR );
       gl.texParameteri( gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST );
-    
+   
       gl.uniform1i(gl.getUniformLocation(program, "texture"), 0);
   }
 
 
   function quad(a, b, c, d) {
+	  
        pointsArray.push(vertices[a]); 
        colorsArray.push(vertexColors[a]); 
        texCoordsArray.push(texCoord[0]);
@@ -67,19 +66,15 @@ myimage.src = "https://webglfundamentals.org/webgl/resources/mip-low-res-example
        colorsArray.push(vertexColors[a]);
        texCoordsArray.push(texCoord[3]);   
   }
+	
   var numVertices  = 36;
-
   var texSize = 64;
-
   var program;
-
   var pointsArray = [];
   var colorsArray = [];
   var texCoordsArray = [];
-
   var texture;
-
-  // demo: change 1,1 tex coord to 0.5, 0.5 
+	
   var texCoord = [
       vec2(0, 0),
       vec2(0, 1),
@@ -126,9 +121,7 @@ myimage.src = "https://webglfundamentals.org/webgl/resources/mip-low-res-example
     specular: vec3(1,1,1),
     constants: new PhongConst(1.0, 1.0, 0.0, 10)
   })
-  
-  // cat tower texture 
-  
+
   let carpet2 = new PhongMat(gl, {
     ambient: vec3(0.05, 0.055, 0.09),
     diffuse: vec3(0.4, 0.4, 0.85),
@@ -148,7 +141,6 @@ myimage.src = "https://webglfundamentals.org/webgl/resources/mip-low-res-example
   v.transform.computeTransform()
   scene.nodes.push(v)
 
-  // floor texture 
   let carpet = new PhongMat(gl, {
     ambient: vec3(0.05, 0.055, 0.09),
     diffuse: vec3(0.4, 0.4, 0.85),
@@ -217,6 +209,7 @@ myimage.src = "https://webglfundamentals.org/webgl/resources/mip-low-res-example
       head.node.push(leftEar)
     
     }
+	  
     cat.node.push(head)
 	
     let leg1 = new Add(gl, cube(1,1,4.5,0.5), catFur)
@@ -252,11 +245,11 @@ myimage.src = "https://webglfundamentals.org/webgl/resources/mip-low-res-example
     cat.node.push(leg4)
 	
     let tail = new Add(gl, cube(7,.5,.5,0.5), catFur)
-   	tail.transform.setCenter(4, 0, -.5)
+    tail.transform.setCenter(4, 0, -.5)
     tail.transform.setScale(0.25)
     tail.transform.translate(-0.75, 0, -0.25)
     tail.transform.computeTransform()
-
+	  
     cat.node.push(tail)
 
   }
@@ -267,10 +260,7 @@ myimage.src = "https://webglfundamentals.org/webgl/resources/mip-low-res-example
 
 window.onload = init
 
-
-
 var SHADER_PROGRAMS = {};
-
 
 function createShaderProgram(gl, vShader, fragShader, uniformNames) {
   let program = initShaders(gl, vShader, fragShader)
@@ -279,22 +269,17 @@ function createShaderProgram(gl, vShader, fragShader, uniformNames) {
   uniformNames.forEach(name => {
     program.locs[name] = gl.getUniformLocation(program, name)
   })
-  
+	
   program.locs.texCoord = gl.getAttribLocation(program, 'a_texCoord')
-  
   program.locs.strength = gl.getAttribLocation(program, 'a_lightStrength')
-  
   program.locs.color = gl.getAttribLocation(program, 'a_vertexColor')
-  
   program.locs.normal = gl.getAttribLocation(program, 'a_vertexNormal')
-  
   program.locs.position = gl.getAttribLocation(program, 'a_vertexPosition')
   return program
 }
 
 function render() {
-  // line of path
-  //legs
+  // legs
   scene.nodes[3].node[1].transform.rotation = rotateZ(20 * Math.cos(fps/30))
   scene.nodes[3].node[1].transform.computeTransform()
   scene.nodes[3].node[3].transform.rotation = rotateZ(20 * Math.cos(fps/30))
@@ -347,7 +332,6 @@ function Scene(gl) {
     'matAmb', 'matDif', 'matSpec', 'constants',
     'lightPosition', 'lightColor', 'lightStrength', 'numLights'
   ]);
-
 
   SHADER_PROGRAMS.LIGHTS = createShaderProgram(gl, "vertex-light", "fragment-basic", [
     'u_projMatrix', 'u_viewMatrix', 'u_modelMatrix'
@@ -424,8 +408,6 @@ Scene.prototype.pushBlendFunc = function(gl, params) {
   gl.blendFunc(params.s, params.d)
 }
 
-
-
 function PhongMat(gl, props, texturePath) {
   if (typeof texturePath !== 'undefined') {
     this.shaderProgram = SHADER_PROGRAMS.PHONG_TEXTURED
@@ -491,7 +473,6 @@ function Transform(x, y, z) {
   this.transform = this.translation
   this.scaling = scalem(1, 1, 1)
 }
-
 
 Camera.prototype.computeView = function() {
   this.transform.computeTransform()
